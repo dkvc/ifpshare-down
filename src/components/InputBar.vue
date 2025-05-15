@@ -12,9 +12,27 @@ import { useToast } from 'primevue'
 
 <template>
   <InputGroup>
-    <InputText placeholder="https://ifpshare.com/..." />
-    <Button label="Create PDF" @click="createPDF" />
+    <InputText placeholder="Enter URL" v-model="urlInput" />
+    <Button label="Create PDF" @click="createPDF" :disabled="loading" />
   </InputGroup>
 
-  <Toast position="bottom-right" />
+  <ProgressSpinner
+    style="width: 50px; height: 50px"
+    strokeWidth="8"
+    fill="transparent"
+    animationDuration=".5s"
+    aria-label="Generating PDF"
+    v-if="loading"
+    class="spinner"
+  />
+  <Toast position="top-right" />
 </template>
+
+<style scoped>
+.spinner {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 1em auto;
+}
+</style>
