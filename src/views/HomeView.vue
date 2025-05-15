@@ -54,6 +54,7 @@ onMounted(() => {
 }
 
 .center-text.title {
+  font-family: 'IBM Plex Sans';
   font-size: 2em;
   font-weight: bold;
   color: var(--p-primary-color);
