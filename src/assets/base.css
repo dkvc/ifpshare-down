@@ -3,7 +3,7 @@
 
 /* CSS Variables */
 :root {
-  --background-color: hsl(60, 9%, 98%);
+  --background-color: hsl(210, 40%, 98%);
   --text-color: hsl(20, 14%, 4%);
 
   @media (prefers-color-scheme: dark) {
