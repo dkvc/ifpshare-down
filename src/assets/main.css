@@ -1,0 +1,30 @@
+@import './base.css';
+
+body {
+  min-height: 100vh;
+  background-color: var(--background-color);
+  color: var(--text-color);
+  font-family:
+    Inter,
+    -apple-system,
+    BlinkMacSystemFont,
+    'Segoe UI',
+    Arial,
+    sans-serif;
+}
+
+@media (prefers-reduced-motion) {
+
+  *,
+  *::before,
+  *::after {
+    /* Effectively disable by making duration tiny */
+    animation-duration: 0.01ms !important;
+    /* Play only once (tiny duration) */
+    animation-iteration-count: 1 !important;
+    /* Effectively disable transitions */
+    transition-duration: 0.01ms !important;
+    /* Disable smooth scrolling */
+    scroll-behavior: auto !important;
+  }
+}

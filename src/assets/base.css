@@ -1,0 +1,36 @@
+/* Fonts */
+@import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Roboto:ital,wght@0,100..900;1,100..900&display=swap');
+
+/* CSS Variables */
+:root {
+  --background-color: hsl(60, 9%, 98%);
+  --text-color: hsl(20, 14%, 4%);
+
+  @media (prefers-color-scheme: dark) {
+    --background-color: hsl(20, 14%, 4%);
+    --text-color: hsl(60, 9%, 98%);
+  }
+}
+
+/* Basic Reset & Body Styling */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html,
+body {
+  height: 100%;
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+
+ul,
+ol {
+  list-style: none;
+}
+
+a {
+  text-decoration: none;
+}
