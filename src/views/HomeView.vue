@@ -19,7 +19,7 @@ onMounted(() => {
             <div class="center-text title">Ifpshare PDF Downloader</div>
           </template>
           <template #subtitle>
-            <div class="center-text">
+            <div class="center-text subtitle">
               Downloads images from https://ifpshare.com and converts them into PDF
             </div>
           </template>
@@ -70,5 +70,39 @@ onMounted(() => {
   transition:
     opacity 0.5s ease,
     transform 0.5s ease;
+}
+
+/* -- Smaller Screens -- */
+@media (max-width: 768px) {
+  #app-horizontal {
+    width: 90%;
+  }
+
+  .center-text.title {
+    font-size: 1.5em;
+  }
+
+  .center-text.subtitle {
+    font-size: 0.9em;
+  }
+}
+
+/* -- Very small screens -- */
+@media (max-width: 480px) {
+  #app-layout {
+    padding: 0.75rem; /* Slightly reduce padding */
+  }
+
+  #app-horizontal {
+    width: 95%;
+  }
+
+  .center-text.title {
+    font-size: 1.3em;
+  }
+
+  .center-text.subtitle {
+    font-size: 0.82em;
+  }
 }
 </style>

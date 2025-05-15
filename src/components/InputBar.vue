@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { computed, onMounted, onUnmounted, ref } from 'vue'
 
 import InputGroup from 'primevue/inputgroup'
 import InputText from 'primevue/inputtext'
@@ -20,6 +20,31 @@ import { getFetchURL } from '@/utils/url'
 const urlInput = ref('')
 const loading = ref(false)
 
+/* Handle Mobile/Different screens */
+const windowWidth = ref(window.innerWidth)
+const isMobile = computed(() => windowWidth.value < 768)
+const toastPosition = computed(() => {
+  return isMobile.value ? 'top-center' : 'top-right'
+})
+const toastBreakpoints = {
+  // When screen width is 767px or less (If you change this, change value in isMobile too)
+  '767px': {
+    width: '90vw',
+  },
+}
+
+const handleResize = () => {
+  windowWidth.value = window.innerWidth
+}
+
+onMounted(() => {
+  window.addEventListener('resize', handleResize)
+})
+
+onUnmounted(() => {
+  window.removeEventListener('resize', handleResize)
+})
+
 /* Initialize toasts */
 const toast = useToast()
 const showError = (message: string) => {
@@ -27,6 +52,7 @@ const showError = (message: string) => {
     severity: 'error',
     summary: 'Error',
     detail: message,
+    life: 3000,
   })
 }
 
@@ -154,5 +180,17 @@ async function createPDF() {
   justify-content: center;
   align-items: center;
   margin: 1em auto;
+}
+
+/* Small screens */
+@media (max-width: 768px) {
+  #mobile-div {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 1em;
+    width: 100%;
+  }
 }
 </style>
