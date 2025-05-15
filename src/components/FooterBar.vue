@@ -1,6 +1,9 @@
 <script setup lang="ts">
 import Button from 'primevue/button'
 import Panel from 'primevue/panel'
+import pkg from '../../package.json'
+
+const appVersion = pkg.version
 </script>
 
 <template>
@@ -8,7 +11,7 @@ import Panel from 'primevue/panel'
     <Panel>
       <div class="footer-bar">
         <p>© MIT License</p>
-        <p id="appVersion">v0.1.0</p>
+        <p id="appVersion">v{{ appVersion }}</p>
         <div class="footer-bar-icons">
           <Button
             as="a"
