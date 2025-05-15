@@ -122,21 +122,30 @@ async function createPDF() {
 </script>
 
 <template>
-  <InputGroup>
-    <InputText placeholder="Enter URL" v-model="urlInput" />
-    <Button label="Create PDF" @click="createPDF" :disabled="loading" />
-  </InputGroup>
+  <div v-focustrap>
+    <div v-if="isMobile" id="mobile-div">
+      <InputText placeholder="Enter URL" v-model="urlInput" autofocus />
+      <Button type="button" label="Create PDF" @click="createPDF" :disabled="loading" />
+    </div>
+    <div v-else>
+      <InputGroup>
+        <InputText placeholder="Enter URL" v-model="urlInput" autofocus />
+        <Button type="button" label="Create PDF" @click="createPDF" :disabled="loading" />
+      </InputGroup>
+    </div>
 
-  <ProgressSpinner
-    style="width: 50px; height: 50px"
-    strokeWidth="8"
-    fill="transparent"
-    animationDuration=".5s"
-    aria-label="Generating PDF"
-    v-if="loading"
-    class="spinner"
-  />
-  <Toast position="top-right" />
+    <ProgressSpinner
+      style="width: 50px; height: 50px"
+      strokeWidth="8"
+      fill="transparent"
+      animationDuration=".5s"
+      aria-label="Generating PDF"
+      v-if="loading"
+      class="spinner"
+    />
+
+    <Toast :position="toastPosition" :breakpoints="toastBreakpoints" />
+  </div>
 </template>
 
 <style scoped>
