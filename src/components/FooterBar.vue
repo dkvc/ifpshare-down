@@ -32,15 +32,13 @@ import Panel from 'primevue/panel'
   justify-content: space-around;
   align-items: center;
 
+  font-family: 'IBM Plex Sans';
+  font-weight: 500;
+
   color: var(--p-text-muted-color);
 }
 
 .footer-bar-icons {
   display: flex;
-}
-
-#appVersion {
-  font-family: 'IBM Plex Sans';
-  font-weight: 500;
 }
 </style>
