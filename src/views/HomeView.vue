@@ -68,8 +68,8 @@ onMounted(() => {
 
 .fade-enter-active {
   transition:
-    opacity 0.5s ease,
-    transform 0.5s ease;
+    opacity 0.3s ease,
+    transform 0.3s ease;
 }
 
 /* -- Smaller Screens -- */
