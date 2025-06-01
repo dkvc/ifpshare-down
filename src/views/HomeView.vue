@@ -84,7 +84,7 @@ onMounted(() => {
 
 /* Animation */
 .fade-enter-from {
-  opacity: 0;
+  opacity: 0.01;
   transform: translateY(10px);
 }
 
