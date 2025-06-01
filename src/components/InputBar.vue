@@ -167,7 +167,7 @@ async function createPDF() {
 
     <ProgressSpinner
       style="width: 50px; height: 50px"
-      strokeWidth="8"
+      strokeWidth="6"
       fill="transparent"
       animationDuration=".5s"
       aria-label="Generating PDF"
