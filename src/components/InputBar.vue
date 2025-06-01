@@ -1,7 +1,8 @@
 <script setup lang="ts">
 import { computed, onMounted, onUnmounted, ref } from 'vue'
 
-import InputGroup from 'primevue/inputgroup'
+import { Form } from '@primevue/forms'
+import InputGroup from 'primevue/InputGroup'
 import InputText from 'primevue/inputtext'
 import Button from 'primevue/button'
 import ProgressSpinner from 'primevue/progressspinner'
@@ -149,15 +150,19 @@ async function createPDF() {
 
 <template>
   <div v-focustrap>
-    <div v-if="isMobile" id="mobile-div">
-      <InputText placeholder="Enter URL" v-model="urlInput" autofocus />
-      <Button type="button" label="Create PDF" @click="createPDF" :disabled="loading" />
+    <div v-if="isMobile">
+      <Form @submit="createPDF" id="mobile-div">
+        <InputText placeholder="Enter URL" v-model="urlInput" :disabled="loading" autofocus />
+        <Button type="submit" label="Create PDF" :disabled="loading" />
+      </Form>
     </div>
     <div v-else>
-      <InputGroup>
-        <InputText placeholder="Enter URL" v-model="urlInput" autofocus />
-        <Button type="button" label="Create PDF" @click="createPDF" :disabled="loading" />
-      </InputGroup>
+      <Form @submit="createPDF">
+        <InputGroup>
+          <InputText placeholder="Enter URL" v-model="urlInput" :disabled="loading" autofocus />
+          <Button type="submit" label="Create PDF" :disabled="loading" />
+        </InputGroup>
+      </Form>
     </div>
 
     <ProgressSpinner
