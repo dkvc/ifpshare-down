@@ -3,12 +3,15 @@
 
 /* CSS Variables */
 :root {
-  --background-color: hsl(210, 40%, 98%);
+  --background-color: hsla(210, 40%, 98%, 0.37);
   --text-color: hsl(20, 14%, 4%);
+  --grid-size: 1rem;
+  --grid-line-color: hsl(0, 0%, 88%);
 
   @media (prefers-color-scheme: dark) {
     --background-color: hsl(20, 14%, 4%);
     --text-color: hsl(60, 9%, 98%);
+    --grid-line-color: hsl(0, 0%, 27%);
   }
 }
 

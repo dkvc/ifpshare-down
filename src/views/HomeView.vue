@@ -38,6 +38,24 @@ onMounted(() => {
   justify-content: center;
   align-items: center;
   min-height: 100vh;
+
+  background-image:
+    repeating-linear-gradient(
+      to right,
+      var(--grid-line-color) 0,
+      var(--grid-line-color) 1px,
+      transparent 1px,
+      transparent var(--grid-size)
+    ),
+    repeating-linear-gradient(
+      to bottom,
+      var(--grid-line-color) 0,
+      var(--grid-line-color) 1px,
+      transparent 1px,
+      transparent var(--grid-size)
+    );
+  background-size: var(--grid-size) var(--grid-size);
+  background-color: var(--background-color);
 }
 
 #app-horizontal {
