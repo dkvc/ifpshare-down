@@ -184,7 +184,7 @@ async function createPDF() {
   display: flex;
   justify-content: center;
   align-items: center;
-  margin: 1em auto;
+  margin: 1.5rem auto 0rem;
 }
 
 /* Small screens */
