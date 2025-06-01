@@ -14,7 +14,7 @@ onMounted(() => {
   <Transition name="fade">
     <main id="app-layout" v-if="showContent">
       <div id="app-horizontal">
-        <Card>
+        <Card class="card">
           <template #title>
             <div class="center-text title">Ifpshare PDF Downloader</div>
           </template>
@@ -67,6 +67,10 @@ onMounted(() => {
 }
 
 /* Card styles */
+.card {
+  box-shadow: 0 4px 8px hsla(0, 0%, 0%, 0.5);
+}
+
 .center-text {
   text-align: center;
 }
