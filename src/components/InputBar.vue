@@ -2,7 +2,7 @@
 import { computed, onMounted, onUnmounted, ref } from 'vue'
 
 import { Form } from '@primevue/forms'
-import InputGroup from 'primevue/inputGroup'
+import InputGroup from 'primevue/inputgroup'
 import InputText from 'primevue/inputtext'
 import Button from 'primevue/button'
 import ProgressSpinner from 'primevue/progressspinner'
