@@ -1,3 +1,37 @@
+/* Fonts - Source code from: https://gwfh.mranftl.com */
+/* ibm-plex-sans-500 - latin */
+@font-face {
+  font-display: swap;
+  font-family: 'IBM Plex Sans';
+  font-style: normal;
+  font-weight: 500;
+  src:
+    url('./fonts/ibm-plex-sans-v22-latin/ibm-plex-sans-v22-latin-500.woff2') format('woff2'),
+    url('./fonts/ibm-plex-sans-v22-latin/ibm-plex-sans-v22-latin-500.ttf') format('truetype');
+}
+
+/* ibm-plex-sans-700 - latin */
+@font-face {
+  font-display: swap;
+  font-family: 'IBM Plex Sans';
+  font-style: normal;
+  font-weight: 700;
+  src:
+    url('./fonts/ibm-plex-sans-v22-latin/ibm-plex-sans-v22-latin-700.woff2') format('woff2'),
+    url('./fonts/ibm-plex-sans-v22-latin/ibm-plex-sans-v22-latin-700.ttf') format('truetype');
+}
+
+/* inter-regular - latin */
+@font-face {
+  font-display: swap;
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 400;
+  src:
+    url('../fonts/inter-v19-latin/inter-v19-latin-regular.woff2') format('woff2'),
+    url('../fonts/inter-v19-latin/inter-v19-latin-regular.ttf') format('truetype');
+}
+
 /* CSS Variables */
 :root {
   --background-color: hsla(210, 40%, 98%, 0.37);
