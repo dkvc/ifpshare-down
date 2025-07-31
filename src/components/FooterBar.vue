@@ -11,18 +11,11 @@ const appVersion = pkg.version
     <Panel>
       <div class="footer-bar">
         <p>© MIT License</p>
-        <p id="appVersion">v{{ appVersion }}</p>
+        <p id="appVersion">v{{ appVersion }}. Source code by <a href="https://dkvc.org/" target="_blank"
+            rel="noopener">dkvc</a>.</p>
         <div class="footer-bar-icons">
-          <Button
-            as="a"
-            label="GitHub"
-            href="https://github.com/dkvc/ifpshare-down/"
-            icon="pi pi-github"
-            target="_blank"
-            rel="noopener"
-            variant="outlined"
-            size="small"
-          />
+          <Button as="a" label="GitHub" href="https://github.com/dkvc/ifpshare-down/" icon="pi pi-github"
+            target="_blank" rel="noopener" variant="outlined" size="small" />
         </div>
       </div>
     </Panel>
