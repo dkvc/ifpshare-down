@@ -11,23 +11,23 @@ onMounted(() => {
 </script>
 
 <template>
-  <Transition name="fade">
-    <main id="app-layout" v-if="showContent">
-      <div id="app-horizontal">
-        <Card class="card">
-          <template #title>
-            <div class="center-text title">Ifpshare PDF Downloader</div>
-          </template>
-          <template #subtitle>
-            <div class="center-text subtitle">
-              Downloads images from https://ifpshare.com and converts them into PDF
-            </div>
-          </template>
-          <template #content><InputBar /></template>
-        </Card>
-      </div>
-    </main>
-  </Transition>
+  <main id="app-layout" v-if="showContent">
+    <div id="app-horizontal">
+      <Card class="card">
+        <template #title>
+          <div class="center-text title">Ifpshare PDF Downloader</div>
+        </template>
+        <template #subtitle>
+          <div class="center-text subtitle">
+            Downloads images from https://ifpshare.com and converts them into PDF
+          </div>
+        </template>
+        <template #content>
+          <InputBar />
+        </template>
+      </Card>
+    </div>
+  </main>
 </template>
 
 <style scoped>
@@ -82,18 +82,6 @@ onMounted(() => {
   color: var(--p-primary-color);
 }
 
-/* Animation */
-.fade-enter-from {
-  opacity: 0.01;
-  transform: translateY(10px);
-}
-
-.fade-enter-active {
-  transition:
-    opacity 0.3s ease,
-    transform 0.3s ease;
-}
-
 /* -- Smaller Screens -- */
 @media (max-width: 768px) {
   #app-horizontal {
@@ -112,7 +100,8 @@ onMounted(() => {
 /* -- Very small screens -- */
 @media (max-width: 480px) {
   #app-layout {
-    padding: 0.75rem; /* Slightly reduce padding */
+    padding: 0.75rem;
+    /* Slightly reduce padding */
   }
 
   #app-horizontal {
