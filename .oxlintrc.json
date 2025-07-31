@@ -1,0 +1,11 @@
+{
+  "$schema": "./node_modules/oxlint/configuration_schema.json",
+  "ignorePatterns": ["**/dist/**", "**/dist-ssr/**", "**/coverage/**"],
+  "plugins": ["typescript", "unicorn", "oxc"],
+  "overrides": [
+    {
+      "files": ["src/**/__tests__/*"],
+      "plugins": ["vitest"]
+    }
+  ]
+}
