@@ -13,6 +13,10 @@ body {
     sans-serif;
 }
 
+a:hover {
+  color: var(--text-color);
+}
+
 @media (prefers-reduced-motion) {
   *,
   *::before,
