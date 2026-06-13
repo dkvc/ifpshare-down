@@ -11,11 +11,11 @@ import Toast from 'primevue/toast'
 import { useToast } from 'primevue'
 
 /* Internal imports */
-import { ParsedJsonSchema, type ParsedJson } from '@/types'
+import { ParsedJsonSchema, ShareResourcesSchema } from '@/types'
 
-import { parsePrefixedImageUrlsFromJson } from '@/utils/json'
+import { parsePrefixedImageUrlsFromJson, parseImageUrlsFromResources } from '@/utils/json'
 import { createAndSavePDF } from '@/utils/pdf'
-import { getFetchURL } from '@/utils/url'
+import { getFetchURL, getMdcArea, isNewFormatURL, extractSId } from '@/utils/url'
 
 /* Refs */
 const urlInput = ref('')
@@ -57,8 +57,8 @@ const showError = (message: string) => {
   })
 }
 
-/* Step 1: Get JSON from the given URL */
-async function getJson(url: string): Promise<ParsedJson | null> {
+/* Step 1: Get image URLs from the given URL */
+async function getImageUrls(url: string): Promise<string[] | null> {
   if (!url) {
     showError('Please enter a URL')
     return null
@@ -70,23 +70,37 @@ async function getJson(url: string): Promise<ParsedJson | null> {
     return null
   }
   try {
-    const response = await fetch(fetchURL)
+    const isNew = isNewFormatURL(url)
+    const headers: Record<string, string> = {}
+    if (isNew) {
+      const sId = extractSId(url)
+      if (sId) {
+        const mdcArea = getMdcArea(sId)
+        if (mdcArea) headers['mdc-area'] = mdcArea
+      }
+    }
+
+    const response = await fetch(fetchURL, { headers: isNew ? headers : undefined })
     if (!response.ok) {
-      showError('Failed to fetch JSON data. Have you entered a valid URL?')
+      showError('Failed to fetch data. Have you entered a valid URL?')
       return null
     }
     const jsonData = await response.json()
+
+    if (isNew) {
+      const resources = ShareResourcesSchema.parse(jsonData)
+      return parseImageUrlsFromResources(resources)
+    }
     const parsedJson = ParsedJsonSchema.parse(jsonData)
-    return parsedJson
-    /* use type zod to validate the jsonData */
+    return parsePrefixedImageUrlsFromJson(parsedJson)
   } catch (error) {
-    showError('Failed to fetch JSON data. Have you entered a valid URL?')
-    console.error('Error fetching JSON:', error)
+    showError('Failed to fetch data. Have you entered a valid URL?')
+    console.error('Error fetching data:', error)
     return null
   }
 }
 
-/* Step 2: Download images from image urls in the JSON data */
+/* Step 2: Download images from image urls */
 async function downloadImages(imageUrls: string[]): Promise<Blob[]> {
   const imageBlobs: Blob[] = []
   /* parallel download */
@@ -97,7 +111,6 @@ async function downloadImages(imageUrls: string[]): Promise<Blob[]> {
         showError('Failed to fetch image. Have you entered a valid URL?')
         return
       }
-      // save all blobs
       const blob = await response.blob()
       imageBlobs.push(blob)
     } catch (error) {
@@ -114,23 +127,12 @@ async function downloadImages(imageUrls: string[]): Promise<Blob[]> {
 async function createPDF() {
   loading.value = true
   const url = urlInput.value.trim()
-  const jsonData = await getJson(url)
-  if (!jsonData) {
-    loading.value = false
-    return
-  }
 
-  const imageUrls = parsePrefixedImageUrlsFromJson(jsonData)
-  if (imageUrls.length === 0) {
-    showError('No PNG images found in the provided URL. Have you entered a valid URL?')
-    loading.value = false
-    return
-  }
-
-  await downloadImages(imageUrls)
-
-  if (imageUrls.length === 0) {
-    showError('No PNG images found in the provided URL. Have you entered a valid URL?')
+  const imageUrls = await getImageUrls(url)
+  if (!imageUrls || imageUrls.length === 0) {
+    if (imageUrls?.length === 0) {
+      showError('No PNG images found in the provided URL.')
+    }
     loading.value = false
     return
   }
@@ -141,7 +143,7 @@ async function createPDF() {
       loading.value = false
     })
     .catch((error) => {
-      showError('Failed to create PDF. Have you entered a valid URL?')
+      showError('Failed to create PDF.')
       console.error('Error creating PDF:', error)
       loading.value = false
     })

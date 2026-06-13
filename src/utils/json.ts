@@ -1,14 +1,5 @@
-/**
- * @description
- * Check if given JSON object conforms to schema ParsedJson and contains an ParsedItemSchema array.
- * Each ParsedItem element should have a contentType and downloadUrl property.
- *
- * Then, Parse Image URLs from the given JSON object.
- * @param data - The ParsedJSON type object to parse.
- * @returns An array of prefixed image URLs found in the Parsed JSON type object.
- */
-import type { ParsedJson } from '@/types'
-import { getFetchURL } from './url'
+import type { ParsedJson, ShareResources } from '@/types'
+import { getFetchURL, proxyIfpshareUrl } from './url'
 
 export const parsePrefixedImageUrlsFromJson = (data: ParsedJson): string[] => {
   const imageUrls: string[] = []
@@ -17,6 +8,20 @@ export const parsePrefixedImageUrlsFromJson = (data: ParsedJson): string[] => {
     const prefixedUrl = getFetchURL(item.downloadUrl)
     if (prefixedUrl) {
       imageUrls.push(prefixedUrl)
+    }
+  }
+
+  return imageUrls
+}
+
+export const parseImageUrlsFromResources = (data: ShareResources): string[] => {
+  const imageUrls: string[] = []
+  for (const record of data) {
+    for (const thumb of record.thumbnails) {
+      if (thumb.contentType === 'png') {
+        const proxiedUrl = proxyIfpshareUrl(thumb.url)
+        imageUrls.push(proxiedUrl)
+      }
     }
   }
 
