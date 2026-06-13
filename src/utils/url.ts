@@ -25,7 +25,10 @@ const getDocumentURL = (url: string): string | null => {
     if (url.startsWith(prefix)) {
       const targetPath = url.slice(prefix.length)
       if (targetPath.startsWith('documentPreview.html?s_id=')) {
-        const documentId = targetPath.split('/')[2]
+        const afterSId = targetPath.split('s_id=')[1]
+        const documentId = afterSId && afterSId.includes('/detail/')
+          ? targetPath.split('/')[2]
+          : afterSId
         return `${FETCH_PUB_API_PREFIX}${documentId}`
       } else if (targetPath.startsWith('api/')) {
         return targetPath
