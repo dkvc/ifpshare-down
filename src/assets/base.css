@@ -6,8 +6,8 @@
   font-style: normal;
   font-weight: 500;
   src:
-    url('./fonts/ibm-plex-sans-v22-latin/ibm-plex-sans-v22-latin-500.woff2') format('woff2'),
-    url('./fonts/ibm-plex-sans-v22-latin/ibm-plex-sans-v22-latin-500.ttf') format('truetype');
+    url('../fonts/ibm-plex-sans-v22-latin/ibm-plex-sans-v22-latin-500.woff2') format('woff2'),
+    url('../fonts/ibm-plex-sans-v22-latin/ibm-plex-sans-v22-latin-500.ttf') format('truetype');
 }
 
 /* ibm-plex-sans-700 - latin */
@@ -17,8 +17,8 @@
   font-style: normal;
   font-weight: 700;
   src:
-    url('./fonts/ibm-plex-sans-v22-latin/ibm-plex-sans-v22-latin-700.woff2') format('woff2'),
-    url('./fonts/ibm-plex-sans-v22-latin/ibm-plex-sans-v22-latin-700.ttf') format('truetype');
+    url('../fonts/ibm-plex-sans-v22-latin/ibm-plex-sans-v22-latin-700.woff2') format('woff2'),
+    url('../fonts/ibm-plex-sans-v22-latin/ibm-plex-sans-v22-latin-700.ttf') format('truetype');
 }
 
 /* inter-regular - latin */
