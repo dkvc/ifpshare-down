@@ -117,6 +117,37 @@ async function getImageUrls(url: string): Promise<string[] | null> {
   }
 }
 
+/* Streaming download with per-chunk progress */
+async function downloadBlob(
+  url: string,
+  signal?: AbortSignal,
+  onChunk?: (received: number, total: number | null) => void,
+): Promise<Blob> {
+  const response = await fetch(url, { signal })
+  if (!response.ok) throw new Error(`HTTP ${response.status}`)
+
+  if (!response.body) {
+    return response.blob()
+  }
+
+  const contentLength = response.headers.get('content-length')
+  const total = contentLength ? parseInt(contentLength, 10) : null
+  const reader = response.body.getReader()
+  const chunks: Uint8Array[] = []
+  let received = 0
+
+  while (true) {
+    const { done, value } = await reader.read()
+    if (done) break
+    chunks.push(value)
+    received += value.length
+    onChunk?.(received, total)
+  }
+
+  const type = response.headers.get('content-type') || 'image/png'
+  return new Blob(chunks, { type })
+}
+
 /* Step 2: Download images with concurrency limit */
 async function downloadImages(
   imageUrls: string[],
@@ -124,22 +155,25 @@ async function downloadImages(
   onProgress?: (done: number, total: number) => void,
 ): Promise<Blob[]> {
   const imageBlobs: Blob[] = []
-  const CONCURRENCY = 4
-  let downloaded = 0
+  const CONCURRENCY = 6
+  let completedCount = 0
+  const totalImages = imageUrls.length
+  const perImageFraction = Array(totalImages).fill(0)
 
   const iterator = imageUrls.entries()
   const workers = Array.from({ length: CONCURRENCY }, async () => {
     for (const [i, url] of iterator) {
       if (signal?.aborted) break
       try {
-        const response = await fetch(url, { signal })
-        if (!response.ok) {
-          showError('Failed to fetch image.')
-          continue
-        }
-        const blob = await response.blob()
+        const blob = await downloadBlob(url, signal, (received, total) => {
+          perImageFraction[i] = total ? received / total : 0
+          const sum = perImageFraction.reduce((a, b) => a + b, 0)
+          onProgress?.(sum, totalImages)
+        })
+        perImageFraction[i] = 1
         imageBlobs[i] = blob
-        onProgress?.(++downloaded, imageUrls.length)
+        completedCount++
+        onProgress?.(completedCount, totalImages)
       } catch (error) {
         if ((error as Error).name === 'AbortError') break
         showError('Failed to fetch image.')
@@ -232,7 +266,7 @@ async function createPDF() {
       <div v-if="progress" class="progress-bar-track">
         <div class="progress-bar-fill" :style="{ width: progressPercent + '%' }"></div>
       </div>
-      <div v-if="progress" class="progress-counter">{{ progress.current }} / {{ progress.total }}</div>
+      <div v-if="progress" class="progress-counter">{{ Math.floor(progress.current) }} / {{ progress.total }}</div>
       <Button label="Cancel" severity="danger" size="small" @click="cancelOperation" class="cancel-btn" />
     </div>
 
