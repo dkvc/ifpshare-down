@@ -1,34 +1,54 @@
-/**
- * @description
- * Utility functions for image processing
- * 1. blobToBase64 - Converts a Blob object to a Base64 string
- */
-export const blobToBase64 = (blob: Blob): Promise<string> => {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader()
-    reader.onloadend = () => {
-      if (reader.result) {
-        resolve(reader.result as string)
-      } else {
-        reject(new Error('Failed to convert blob to base64'))
-      }
-    }
-    reader.onerror = () => {
-      reject(new Error('Failed to read blob'))
-    }
-    reader.readAsDataURL(blob)
-  })
+export interface ProcessedImage {
+  width: number
+  height: number
+  data: Uint8Array
 }
 
-export const getImageSize = (base64: string): Promise<{ width: number; height: number }> => {
+export async function processImages(
+  blobs: Blob[],
+  onProgress: (done: number, total: number) => void,
+  signal?: AbortSignal,
+): Promise<ProcessedImage[]> {
   return new Promise((resolve, reject) => {
-    const img = new Image()
-    img.src = base64
-    img.onload = () => {
-      resolve({ width: img.width, height: img.height })
+    const worker = new Worker(
+      new URL('@/workers/image-worker.ts', import.meta.url),
+      { type: 'module' },
+    )
+    const results: ProcessedImage[] = []
+    let done = 0
+
+    worker.onmessage = (e) => {
+      if (e.data.error) {
+        worker.terminate()
+        reject(new Error(e.data.error))
+        return
+      }
+      results[e.data.index] = {
+        width: e.data.width,
+        height: e.data.height,
+        data: new Uint8Array(e.data.data),
+      }
+      onProgress(++done, blobs.length)
+      if (done === blobs.length) {
+        worker.terminate()
+        resolve(results)
+      }
     }
-    img.onerror = () => {
-      reject(new Error('Failed to load image'))
+
+    worker.onerror = (e) => {
+      worker.terminate()
+      reject(e)
+    }
+
+    if (signal) {
+      signal.addEventListener('abort', () => {
+        worker.terminate()
+        reject(new DOMException('Aborted', 'AbortError'))
+      })
+    }
+
+    for (let i = 0; i < blobs.length; i++) {
+      worker.postMessage({ blob: blobs[i], index: i })
     }
   })
 }

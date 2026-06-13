@@ -14,6 +14,7 @@ import { useToast } from 'primevue'
 import { ParsedJsonSchema, ShareResourcesSchema } from '@/types'
 
 import { parsePrefixedImageUrlsFromJson, parseImageUrlsFromResources } from '@/utils/json'
+import { processImages } from '@/utils/image'
 import { createAndSavePDF } from '@/utils/pdf'
 import { getFetchURL, getMdcArea, isNewFormatURL, extractSId } from '@/utils/url'
 
@@ -100,26 +101,31 @@ async function getImageUrls(url: string): Promise<string[] | null> {
   }
 }
 
-/* Step 2: Download images from image urls */
-async function downloadImages(imageUrls: string[]): Promise<Blob[]> {
+/* Step 2: Download images with concurrency limit */
+async function downloadImages(imageUrls: string[], signal?: AbortSignal): Promise<Blob[]> {
   const imageBlobs: Blob[] = []
-  /* parallel download */
-  const downloadPromises = imageUrls.map(async (url) => {
-    try {
-      const response = await fetch(url)
-      if (!response.ok) {
-        showError('Failed to fetch image. Have you entered a valid URL?')
-        return
+  const CONCURRENCY = 4
+
+  const iterator = imageUrls.entries()
+  const workers = Array.from({ length: CONCURRENCY }, async () => {
+    for (const [i, url] of iterator) {
+      if (signal?.aborted) break
+      try {
+        const response = await fetch(url, { signal })
+        if (!response.ok) {
+          showError('Failed to fetch image.')
+          continue
+        }
+        const blob = await response.blob()
+        imageBlobs[i] = blob
+      } catch (error) {
+        if ((error as Error).name === 'AbortError') break
+        showError('Failed to fetch image.')
+        console.error('Error fetching image:', error)
       }
-      const blob = await response.blob()
-      imageBlobs.push(blob)
-    } catch (error) {
-      showError('Failed to fetch image. Have you entered a valid URL?')
-      console.error('Error fetching image:', error)
     }
   })
-
-  await Promise.all(downloadPromises)
+  await Promise.all(workers)
   return imageBlobs
 }
 
@@ -137,16 +143,21 @@ async function createPDF() {
     return
   }
 
-  const imageBlobs = await downloadImages(imageUrls)
-  createAndSavePDF(imageBlobs)
-    .then(() => {
-      loading.value = false
-    })
-    .catch((error) => {
+  const abortController = new AbortController()
+  const noop = () => {}
+
+  try {
+    const imageBlobs = await downloadImages(imageUrls, abortController.signal)
+    const processed = await processImages(imageBlobs, noop, abortController.signal)
+    await createAndSavePDF(processed)
+  } catch (error) {
+    if ((error as Error).name !== 'AbortError') {
       showError('Failed to create PDF.')
       console.error('Error creating PDF:', error)
-      loading.value = false
-    })
+    }
+  } finally {
+    loading.value = false
+  }
 }
 </script>
 
