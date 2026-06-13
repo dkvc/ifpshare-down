@@ -1,2 +1,4 @@
-ignoredBuiltDependencies:
-  - esbuild
+allowBuilds:
+  core-js: false
+  esbuild: false
+minimumReleaseAge: 1440
