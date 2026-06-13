@@ -5,7 +5,6 @@ import { Form } from '@primevue/forms'
 import InputGroup from 'primevue/inputgroup'
 import InputText from 'primevue/inputtext'
 import Button from 'primevue/button'
-import ProgressSpinner from 'primevue/progressspinner'
 
 import Toast from 'primevue/toast'
 import { useToast } from 'primevue'
@@ -21,6 +20,24 @@ import { getFetchURL, getMdcArea, isNewFormatURL, extractSId } from '@/utils/url
 /* Refs */
 const urlInput = ref('')
 const loading = ref(false)
+const phase = ref<'idle' | 'downloading' | 'processing' | 'generating'>('idle')
+const progress = ref<{ current: number; total: number } | null>(null)
+const abortController = ref<AbortController | null>(null)
+
+/* Computed */
+const progressPercent = computed(() => {
+  if (!progress.value) return 0
+  return Math.round((progress.value.current / progress.value.total) * 100)
+})
+
+const phaseLabel = computed(() => {
+  switch (phase.value) {
+    case 'downloading': return 'Downloading images...'
+    case 'processing': return 'Processing images...'
+    case 'generating': return 'Generating PDF...'
+    default: return ''
+  }
+})
 
 /* Handle Mobile/Different screens */
 const windowWidth = ref(window.innerWidth)
@@ -29,7 +46,6 @@ const toastPosition = computed(() => {
   return isMobile.value ? 'top-center' : 'top-right'
 })
 const toastBreakpoints = {
-  // When screen width is 767px or less (If you change this, change value in isMobile too)
   '767px': {
     width: '90vw',
   },
@@ -102,9 +118,14 @@ async function getImageUrls(url: string): Promise<string[] | null> {
 }
 
 /* Step 2: Download images with concurrency limit */
-async function downloadImages(imageUrls: string[], signal?: AbortSignal): Promise<Blob[]> {
+async function downloadImages(
+  imageUrls: string[],
+  signal?: AbortSignal,
+  onProgress?: (done: number, total: number) => void,
+): Promise<Blob[]> {
   const imageBlobs: Blob[] = []
   const CONCURRENCY = 4
+  let downloaded = 0
 
   const iterator = imageUrls.entries()
   const workers = Array.from({ length: CONCURRENCY }, async () => {
@@ -118,6 +139,7 @@ async function downloadImages(imageUrls: string[], signal?: AbortSignal): Promis
         }
         const blob = await response.blob()
         imageBlobs[i] = blob
+        onProgress?.(++downloaded, imageUrls.length)
       } catch (error) {
         if ((error as Error).name === 'AbortError') break
         showError('Failed to fetch image.')
@@ -129,26 +151,50 @@ async function downloadImages(imageUrls: string[], signal?: AbortSignal): Promis
   return imageBlobs
 }
 
+/* Cancel */
+function cancelOperation() {
+  abortController.value?.abort()
+  abortController.value = null
+  phase.value = 'idle'
+  progress.value = null
+  loading.value = false
+}
+
 /* Main function to create PDF */
 async function createPDF() {
   loading.value = true
+  phase.value = 'downloading'
+  progress.value = null
+  abortController.value = new AbortController()
+  const signal = abortController.value.signal
+
   const url = urlInput.value.trim()
 
   const imageUrls = await getImageUrls(url)
   if (!imageUrls || imageUrls.length === 0) {
-    if (imageUrls?.length === 0) {
-      showError('No PNG images found in the provided URL.')
-    }
-    loading.value = false
+    if (imageUrls?.length === 0) showError('No PNG images found in the provided URL.')
+    cancelOperation()
     return
   }
 
-  const abortController = new AbortController()
-  const noop = () => {}
+  progress.value = { current: 0, total: imageUrls.length }
 
   try {
-    const imageBlobs = await downloadImages(imageUrls, abortController.signal)
-    const processed = await processImages(imageBlobs, noop, abortController.signal)
+    const imageBlobs = await downloadImages(
+      imageUrls,
+      signal,
+      (done, total) => { progress.value = { current: done, total } },
+    )
+
+    phase.value = 'processing'
+    const processed = await processImages(
+      imageBlobs,
+      (done, total) => { progress.value = { current: done, total } },
+      signal,
+    )
+
+    phase.value = 'generating'
+    progress.value = null
     await createAndSavePDF(processed)
   } catch (error) {
     if ((error as Error).name !== 'AbortError') {
@@ -157,6 +203,9 @@ async function createPDF() {
     }
   } finally {
     loading.value = false
+    phase.value = 'idle'
+    progress.value = null
+    abortController.value = null
   }
 }
 </script>
@@ -178,26 +227,55 @@ async function createPDF() {
       </Form>
     </div>
 
-    <ProgressSpinner
-      style="width: 50px; height: 50px"
-      strokeWidth="6"
-      fill="transparent"
-      animationDuration=".5s"
-      aria-label="Generating PDF"
-      v-if="loading"
-      class="spinner"
-    />
+    <div v-if="loading" class="progress-area">
+      <div class="progress-label">{{ phaseLabel }}</div>
+      <div v-if="progress" class="progress-bar-track">
+        <div class="progress-bar-fill" :style="{ width: progressPercent + '%' }"></div>
+      </div>
+      <div v-if="progress" class="progress-counter">{{ progress.current }} / {{ progress.total }}</div>
+      <Button label="Cancel" severity="danger" size="small" @click="cancelOperation" class="cancel-btn" />
+    </div>
 
     <Toast :position="toastPosition" :breakpoints="toastBreakpoints" />
   </div>
 </template>
 
 <style scoped>
-.spinner {
+.progress-area {
   display: flex;
-  justify-content: center;
+  flex-direction: column;
   align-items: center;
-  margin: 1.5rem auto 0rem;
+  gap: 0.5rem;
+  margin-top: 1.5rem;
+}
+
+.progress-label {
+  font-size: 0.9rem;
+  color: var(--p-text-muted-color);
+}
+
+.progress-bar-track {
+  width: 100%;
+  height: 6px;
+  background: var(--p-surface-200);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.progress-bar-fill {
+  height: 100%;
+  background: var(--p-primary-color);
+  border-radius: 3px;
+  transition: width 0.2s ease;
+}
+
+.progress-counter {
+  font-size: 0.8rem;
+  color: var(--p-text-muted-color);
+}
+
+.cancel-btn {
+  margin-top: 0.25rem;
 }
 
 /* Small screens */
