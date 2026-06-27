@@ -14,7 +14,7 @@ export const extractSId = (url: string): string | null => {
   for (const prefix of PREFIXES) {
     if (url.startsWith(prefix)) {
       const targetPath = url.slice(prefix.length)
-      if (targetPath.startsWith('documentPreview.html?s_id=')) {
+      if (targetPath.startsWith('documentPreview.html/?s_id=') || targetPath.startsWith('documentPreview.html?s_id=')) {
         return targetPath.split('s_id=')[1] ?? null
       }
     }
@@ -35,12 +35,12 @@ const getDocumentURL = (url: string): string | null => {
   for (const prefix of PREFIXES) {
     if (url.startsWith(prefix)) {
       const targetPath = url.slice(prefix.length)
-      if (targetPath.startsWith('documentPreview.html?s_id=')) {
+      if (targetPath.startsWith('documentPreview.html/?s_id=') || targetPath.startsWith('documentPreview.html?s_id=')) {
         const afterSId = targetPath.split('s_id=')[1]
         if (afterSId && isNewFormatSId(afterSId)) {
           return `${API_SHARES_BASE}/${afterSId}/resources`
         }
-        const documentId = targetPath.split('/')[2]
+        const documentId = afterSId.split('/')[2]
         return `${FETCH_PUB_API_PREFIX}${documentId}`
       } else if (targetPath.startsWith('api/')) {
         return targetPath
