@@ -16,11 +16,12 @@ export const parsePrefixedImageUrlsFromJson = (data: ParsedJson): string[] => {
 
 export const parseImageUrlsFromResources = (data: ShareResources): string[] => {
   const imageUrls: string[] = []
-  for (const record of data) {
-    for (const thumb of record.thumbnails) {
+  const sortedRecords = [...data].sort((a, b) => a.indexOf - b.indexOf)
+  for (const record of sortedRecords) {
+    const sortedThumbs = [...record.thumbnails].sort((a, b) => a.indexOf - b.indexOf)
+    for (const thumb of sortedThumbs) {
       if (thumb.contentType === 'png') {
-        const proxiedUrl = proxyIfpshareUrl(thumb.url)
-        imageUrls.push(proxiedUrl)
+        imageUrls.push(proxyIfpshareUrl(thumb.url))
       }
     }
   }

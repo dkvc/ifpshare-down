@@ -19,6 +19,7 @@ export const ThumbnailSchema = z.object({
 
 export const ShareRecordSchema = z.object({
   itemId: z.string(),
+  indexOf: z.number(),
   thumbnails: z.array(ThumbnailSchema).min(1),
 })
 
